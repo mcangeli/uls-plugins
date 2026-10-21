@@ -1,0 +1,9 @@
+# ULS native screen plugin manifest (API v1).
+# The folder name must match the id. Use TOML OR JSON, never both.
+id = "hello-world"
+name = "Hello World"
+version = "0.1.0"
+api_version = 1
+capabilities = ["screen"]
+entry_point = "hello_world:HelloWorldScreen"
+description = "Documented introductory 64x32 screen plugin"
