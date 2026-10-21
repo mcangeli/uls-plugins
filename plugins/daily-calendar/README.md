@@ -12,6 +12,23 @@ Install, enable, then open Settings. Set **Google Calendar ICS URL**, **IANA tim
 
 In Google Calendar, open **Settings → Settings for my calendars → Integrate calendar** and copy either the public iCal URL (only for public calendars) or **Secret address in iCal format** (for private calendars). Do **not** use the browser's calendar URL. Treat the secret address as a password: anyone holding it can read your calendar. ULS stores plugin settings locally and may expose the URL to authorized dashboard administrators; avoid sharing screenshots of the settings field.
 
+## Refreshing after adding an event
+
+The **Refresh catalog** button in Plugin Manager refreshes the *plugin directory*, not your Google Calendar feed. Daily Calendar refreshes its own ICS cache every 15 minutes by default (adjustable in plugin Settings, minimum 5 minutes). Google may take additional time to publish new entries to the ICS feed. Rendering reads the cached events and checks expiry locally, so events disappear when they end even between downloads.
+
+For a quicker update, temporarily set **Refresh every** to **5 minutes** in plugin Settings, save, and allow the next scheduled refresh. Changing this setting does **not** automatically invalidate an existing fresh cache. Do not delete the cached JSON file while a refresh is running. A dedicated **Refresh calendar now** action is a useful follow-up enhancement.
+
+## Developer walkthrough: text-only external data
+
+1. `uls-plugin.toml` declares the `daily_calendar:DailyCalendarScreen` entry point; `settings-schema.json` defines editable fields and mandatory `display_seconds`.
+2. `configure()` receives the URL, timezone, refresh interval and event cycling interval. The feed URL is a secret capability link; never print it.
+3. `render()` constructs a 64×32 `Framebuffer`, draws `TODAY` and a divider using `frame.text()` and `frame.pixel()`, and reads a local JSON event cache. No image file is involved.
+4. When the cache is stale, `launch_refresh()` starts a separate fetch process, because ULS gives each frame a fresh subprocess with a short rendering timeout. The network request does **not** run inside `render()`.
+5. `parse_ics()` converts individual VEVENT start/end times into timestamps; `active_today()` filters expired events at render time. The title row scrolls when too long, and the lower row shows the start time or `ALL DAY`.
+6. If no events qualify, the plugin draws `NO EVENTS`. It still returns a complete framebuffer as required by the native screen API.
+
+`test_daily_calendar.py` contains examples for ICS parsing, end-time expiration, URL validation and text-frame dimensions. This plugin is a more advanced example than Hello World: it demonstrates local caching, network separation, time zones and external text data.
+
 ## Behavior
 
 - Shows events in start-time order, rotating one event every configured number of seconds.
