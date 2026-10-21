@@ -1,6 +1,6 @@
 # Daily Calendar (native ULS text-only plugin)
 
-Shows today's remaining events on a **64×32** matrix using ULS's built-in 5×7 pixel text font. **No image files, Pillow, Google login, OAuth, or third-party Python packages.** The returned `Framebuffer` is still the required 64×32 RGB pixel output; "text-only" means the plugin draws text directly.
+Shows today's remaining events on a **64×32** matrix using ULS's built-in 5×7 pixel text font. **No image files, Pillow, Google login, OAuth, or third-party Python packages in the current ICS version.** The returned `Framebuffer` is still the required 64×32 RGB pixel output; "text-only" means the plugin draws text directly.
 
 ## Install
 
@@ -16,7 +16,7 @@ In Google Calendar, open **Settings → Settings for my calendars → Integrate 
 
 The **Refresh catalog** button in Plugin Manager refreshes the *plugin directory*, not your Google Calendar feed. Daily Calendar refreshes its own ICS cache every 15 minutes by default (adjustable in plugin Settings, minimum 5 minutes). Google may take additional time to publish new entries to the ICS feed. Rendering reads the cached events and checks expiry locally, so events disappear when they end even between downloads.
 
-For a quicker update, temporarily set **Refresh every** to **5 minutes** in plugin Settings, save, and allow the next scheduled refresh. Changing this setting does **not** automatically invalidate an existing fresh cache. Do not delete the cached JSON file while a refresh is running. A dedicated **Refresh calendar now** action is a useful follow-up enhancement.
+Use **Plugin Manager → Installed → Daily Calendar → Refresh calendar now** to invalidate the local event cache and trigger a fresh fetch on the next render. This bypasses the plugin's local refresh timer, **not Google's own ICS publication delay**. Changing **Refresh every** does not automatically invalidate an existing fresh cache. Do not delete cached files manually while a refresh is running.
 
 ## Developer walkthrough: text-only external data
 
@@ -58,3 +58,7 @@ return frame
 ```
 
 No PNG or bitmap generation is necessary: ULS serializes the framebuffer to the LED matrix.
+
+## Planned Google Calendar authorization (post-0.9.0 plugin enhancement)
+
+Direct read-only Google Calendar OAuth will be offered alongside the existing ICS feed. This is **plugin work**, not a dependency for ULS Core 0.9.0. It requires an explicit Google Cloud OAuth client configuration, a secure local callback and state/PKCE handling, restricted token storage, refresh/revocation, calendar selection, and Google Calendar API event retrieval with recurring instances expanded. No Google credentials should be embedded in the plugin source or catalog. Until this is implemented, the plugin remains ICS-only and subject to Google's feed publication lag.
