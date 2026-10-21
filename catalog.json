@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "plugins": [
+    {
+      "id": "swimming-fish",
+      "name": "Swimming Fish",
+      "description": "Animated 64x32 fish and bubbles",
+      "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/swimming-fish",
+      "version": "0.1.0",
+      "capabilities": [
+        "screen"
+      ]
+    }
+  ]
+}
