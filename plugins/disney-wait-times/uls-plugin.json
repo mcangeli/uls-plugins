@@ -1,0 +1,11 @@
+{
+  "id": "disney-wait-times",
+  "name": "Disney Wait Times",
+  "version": "0.1.0",
+  "api_version": 1,
+  "capabilities": [
+    "screen"
+  ],
+  "entry_point": "disney_wait_times:DisneyWaitTimesScreen",
+  "description": "Walt Disney World attraction standby waits on a 64x32 matrix"
+}
