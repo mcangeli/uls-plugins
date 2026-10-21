@@ -1,0 +1,36 @@
+{
+  "fields": {
+    "display_seconds": {
+      "type": "integer",
+      "default": 12,
+      "min": 3,
+      "max": 120,
+      "label": "Display duration"
+    },
+    "park": {
+      "type": "string",
+      "default": "Magic Kingdom",
+      "choices": [
+        "Magic Kingdom",
+        "EPCOT",
+        "Hollywood Studios",
+        "Animal Kingdom"
+      ],
+      "label": "Park"
+    },
+    "refresh_minutes": {
+      "type": "integer",
+      "default": 5,
+      "min": 2,
+      "max": 60,
+      "label": "Refresh interval (minutes)"
+    },
+    "max_wait_minutes": {
+      "type": "integer",
+      "default": 180,
+      "min": 0,
+      "max": 300,
+      "label": "Maximum wait shown (0 = all)"
+    }
+  }
+}
