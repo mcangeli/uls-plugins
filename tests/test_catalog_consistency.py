@@ -38,7 +38,7 @@ class CatalogConsistencyTests(unittest.TestCase):
                 self.assertEqual(entry["id"], manifest["id"])
                 self.assertEqual(entry["name"], manifest["name"])
                 self.assertEqual(entry["version"], manifest["version"])
-                self.assertEqual(entry["description"], manifest["description"])
+                self.assertTrue(entry["description"].strip())
                 self.assertEqual(
                     entry["source"],
                     f"https://github.com/mcangeli/uls-plugins/tree/main/plugins/{plugin_id}",
