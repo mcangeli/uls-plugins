@@ -84,7 +84,8 @@ def fetch_today(access_token, calendar_ids, timezone="America/New_York",
                 day=None, opener=urlopen):
     if not isinstance(calendar_ids, (list, tuple)) or not calendar_ids:
         return []
-    day = day or dt.datetime.now().astimezone().date()
+    from zoneinfo import ZoneInfo
+    day = day or dt.datetime.now(ZoneInfo(timezone)).date()
     start, end = day_bounds(day, timezone)
     events = []
     for calendar_id in calendar_ids:
