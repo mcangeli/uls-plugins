@@ -6,20 +6,21 @@
       "name": "Swimming Fish",
       "description": "Animated 64x32 fish and bubbles",
       "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/swimming-fish",
-      "version": "0.2.0",
-      "capabilities": [
-        "screen"
-      ]
+      "version": "0.2.0"
     },
     {
       "id": "disney-wait-times",
       "name": "Disney Wait Times",
       "description": "Walt Disney World standby wait times on 64x32",
       "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/disney-wait-times",
-      "version": "0.2.0",
-      "capabilities": [
-        "screen"
-      ]
+      "version": "0.2.0"
+    },
+    {
+      "id": "daily-calendar",
+      "name": "Daily Calendar",
+      "description": "Today's Google Calendar ICS events on a text-only 64x32 screen",
+      "version": "0.1.0",
+      "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/daily-calendar"
     }
   ]
 }
