@@ -1,0 +1,8 @@
+# Native ULS plugin manifest
+id = "swimming-fish"
+name = "Swimming Fish"
+version = "0.2.0"
+api_version = 1
+capabilities = ["screen"]
+entry_point = "swimming_fish:SwimmingFishScreen"
+description = "Animated tropical fish and bubbles for a 64x32 LED matrix"
