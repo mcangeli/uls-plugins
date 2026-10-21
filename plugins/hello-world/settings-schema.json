@@ -1,0 +1,18 @@
+{
+  "fields": {
+    "display_seconds": {
+      "type": "integer",
+      "default": 12,
+      "min": 1,
+      "max": 120,
+      "label": "Display duration",
+      "description": "Seconds displayed during idle rotation"
+    },
+    "message": {
+      "type": "string",
+      "default": "HELLO",
+      "label": "Message",
+      "description": "Up to 10 supported uppercase characters"
+    }
+  }
+}
