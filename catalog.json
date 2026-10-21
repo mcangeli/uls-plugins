@@ -6,7 +6,7 @@
       "name": "Swimming Fish",
       "description": "Animated 64x32 fish and bubbles",
       "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/swimming-fish",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "capabilities": [
         "screen"
       ]
@@ -16,7 +16,7 @@
       "name": "Disney Wait Times",
       "description": "Walt Disney World standby wait times on 64x32",
       "source": "https://github.com/mcangeli/uls-plugins/tree/main/plugins/disney-wait-times",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "capabilities": [
         "screen"
       ]
