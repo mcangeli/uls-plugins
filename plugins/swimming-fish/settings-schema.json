@@ -1,0 +1,29 @@
+{
+  "fields": {
+    "display_seconds": {
+      "type": "integer",
+      "default": 12,
+      "min": 3,
+      "max": 120,
+      "label": "Display duration",
+      "description": "Seconds shown in idle rotation"
+    },
+    "animation_speed": {
+      "type": "number",
+      "default": 1,
+      "min": 0.25,
+      "max": 3,
+      "label": "Swimming speed"
+    },
+    "fish_color": {
+      "type": "string",
+      "default": "gold",
+      "choices": [
+        "gold",
+        "blue",
+        "pink"
+      ],
+      "label": "Fish color"
+    }
+  }
+}
