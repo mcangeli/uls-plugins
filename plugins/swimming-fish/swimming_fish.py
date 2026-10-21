@@ -14,13 +14,23 @@ class SwimmingFishScreen:
 
     def __init__(self, clock=None):
         self.clock = clock or time.monotonic
+        self.animation_speed = 1.0
+        self.fish_color = 'gold'
+
+    def configure(self, settings):
+        self.animation_speed = float(settings.get('animation_speed', 1))
+        self.fish_color = settings.get('fish_color', 'gold')
 
     def render(self) -> Framebuffer:
         frame = Framebuffer(64, 32)
         for y in range(32):
             for x in range(64):
                 frame.pixel(x, y, WATER)
-        tick = int(self.clock() * 5)
+        tick = int(self.clock() * 5 * self.animation_speed)
+        palette = {'gold': (FISH, FIN),
+                   'blue': ((62, 167, 255), (31, 105, 211)),
+                   'pink': ((255, 128, 190), (226, 75, 149))}
+        fish_color, fin_color = palette.get(self.fish_color, palette['gold'])
         cx = (tick % 86) - 11
         cy = 15 + ((tick // 7) % 5) - 2
         # Body: rounded silhouette, pointed snout at the right.
@@ -29,17 +39,17 @@ class SwimmingFishScreen:
                  2: (-6, 8), 3: (-4, 6), 4: (0, 3) }
         for dy, (left, right) in rows.items():
             for dx in range(left, right + 1):
-                frame.pixel(cx + dx, cy + dy, FISH)
+                frame.pixel(cx + dx, cy + dy, fish_color)
         # Tail flaps every other frame.
         tail_offset = 2 if tick % 2 else -2
         for dx in range(-12, -7):
             spread = -dx - 7
             for dy in range(-spread, spread + 1):
                 if abs(dy - tail_offset) <= spread:
-                    frame.pixel(cx + dx, cy + dy, FIN)
+                    frame.pixel(cx + dx, cy + dy, fin_color)
         for dx in range(-2, 3):
-            frame.pixel(cx + dx, cy - 5, FIN)
-            frame.pixel(cx + dx, cy + 5, FIN)
+            frame.pixel(cx + dx, cy - 5, fin_color)
+            frame.pixel(cx + dx, cy + 5, fin_color)
         frame.pixel(cx + 6, cy - 2, EYE)
         # Bubbles rise on independent cycles.
         for i in range(4):
