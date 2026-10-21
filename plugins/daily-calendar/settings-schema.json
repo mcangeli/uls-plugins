@@ -1,0 +1,36 @@
+{
+  "fields": {
+    "display_seconds": {
+      "type": "integer",
+      "default": 12,
+      "min": 3,
+      "max": 120,
+      "label": "Display duration"
+    },
+    "feed_url": {
+      "type": "string",
+      "default": "",
+      "label": "Google Calendar ICS URL",
+      "description": "Use a public or secret iCal feed URL; treat secret links as credentials."
+    },
+    "timezone": {
+      "type": "string",
+      "default": "America/New_York",
+      "label": "IANA time zone"
+    },
+    "refresh_minutes": {
+      "type": "integer",
+      "default": 15,
+      "min": 5,
+      "max": 120,
+      "label": "Refresh every (minutes)"
+    },
+    "event_seconds": {
+      "type": "integer",
+      "default": 6,
+      "min": 2,
+      "max": 60,
+      "label": "Seconds per event"
+    }
+  }
+}
