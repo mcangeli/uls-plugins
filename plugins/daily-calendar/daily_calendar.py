@@ -58,37 +58,132 @@ def parse_date(value, key, local_zone):
     return parsed.astimezone(local_zone), False
 
 
-def parse_ics(source, timezone="America/New_York"):
-    """Parse VEVENT DTSTART/DTEND, including UTC, TZID and all-day dates.
+WEEKDAYS = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
 
-    RRULE recurring series are intentionally not expanded in v0.1.0.
-    Google Calendar's basic ICS export can contain recurring masters; see README.
-    """
-    zone = ZoneInfo(timezone)
-    events = []
+
+def _rule_values(value):
+    return dict(part.split("=", 1) for part in value.split(";") if "=" in part)
+
+
+def _event_fields(source):
     fields = None
     for line in unfold(source):
         if line == "BEGIN:VEVENT":
             fields = {}
         elif line == "END:VEVENT" and fields is not None:
-            try:
-                if "RRULE" not in fields and fields.get("STATUS", ("", ""))[1].upper() != "CANCELLED":
-                    start_key, start_val = fields["DTSTART"]
-                    start, all_day = parse_date(start_val, start_key, zone)
-                    if "DTEND" in fields:
-                        end = parse_date(fields["DTEND"][1], fields["DTEND"][0], zone)[0]
-                    else:
-                        end = start + (dt.timedelta(days=1) if all_day else dt.timedelta(hours=1))
-                    if end > start:
-                        events.append({"start": start.timestamp(), "end": end.timestamp(),
-                                       "title": decode_text(fields.get("SUMMARY", ("", "UNTITLED"))[1]) or "UNTITLED",
-                                       "all_day": all_day})
-            except (KeyError, ValueError, OverflowError):
-                pass
+            yield fields
             fields = None
         elif fields is not None and ":" in line:
             key, value = line.split(":", 1)
-            fields[key.split(";", 1)[0].upper()] = (key, value)
+            fields.setdefault(key.split(";", 1)[0].upper(), []).append((key, value))
+
+
+def _first(fields, name):
+    return fields.get(name, [None])[0]
+
+
+def _occurrences(start, rule, zone, window_start, window_end):
+    """Bound recurrence expansion to a short window, without external dependencies."""
+    parts = _rule_values(rule)
+    freq = parts.get("FREQ", "")
+    if freq not in ("DAILY", "WEEKLY", "MONTHLY", "YEARLY"):
+        return
+    interval = max(1, int(parts.get("INTERVAL", "1")))
+    count = int(parts.get("COUNT", "0"))
+    until = parts.get("UNTIL")
+    until_time = parse_date(until, "UNTIL", zone)[0] if until else None
+    byday = [WEEKDAYS[token[-2:]] for token in parts.get("BYDAY", "").split(",")
+             if token[-2:] in WEEKDAYS and (len(token) == 2)]
+    bymonthday = [int(n) for n in parts.get("BYMONTHDAY", "").split(",") if n]
+    bymonth = [int(n) for n in parts.get("BYMONTH", "").split(",") if n]
+    cursor = start.date()
+    last = window_end.date()
+    emitted = 0
+    scanned = 0
+    while cursor <= last and scanned < 366 * 100:
+        scanned += 1
+        day_delta = (cursor - start.date()).days
+        week_delta = (cursor - start.date()).days // 7
+        month_delta = (cursor.year - start.year) * 12 + cursor.month - start.month
+        year_delta = cursor.year - start.year
+        if freq == "DAILY":
+            match = day_delta % interval == 0
+        elif freq == "WEEKLY":
+            match = week_delta % interval == 0 and cursor.weekday() in (byday or [start.weekday()])
+        elif freq == "MONTHLY":
+            match = month_delta % interval == 0 and cursor.day in (bymonthday or [start.day])
+        else:
+            match = year_delta % interval == 0 and cursor.month in (bymonth or [start.month]) and cursor.day in (bymonthday or [start.day])
+        if bymonth and cursor.month not in bymonth:
+            match = False
+        if bymonthday and cursor.day not in bymonthday:
+            match = False
+        if byday and cursor.weekday() not in byday:
+            match = False
+        candidate = dt.datetime.combine(cursor, start.timetz())
+        if until_time is not None and candidate > until_time:
+            break
+        if match and candidate >= start:
+            emitted += 1
+            if count and emitted > count:
+                break
+            if candidate >= window_start:
+                yield candidate
+        cursor += dt.timedelta(days=1)
+
+
+def parse_ics(source, timezone="America/New_York", now=None):
+    """Expand common ICS recurrences, exclusions and detached instances for the display window."""
+    zone = ZoneInfo(timezone)
+    now_dt = dt.datetime.fromtimestamp(time.time() if now is None else now, zone)
+    window_start = now_dt - dt.timedelta(days=2)
+    window_end = now_dt + dt.timedelta(days=35)
+    events = []
+    exclusions = {}
+    detached = set()
+    records = list(_event_fields(source))
+    for fields in records:
+        uid = (_first(fields, "UID") or ("", ""))[1]
+        recurrence = _first(fields, "RECURRENCE-ID")
+        if recurrence:
+            try:
+                original = parse_date(recurrence[1], recurrence[0], zone)[0]
+                detached.add((uid, original.timestamp()))
+            except (ValueError, OverflowError, KeyError):
+                pass
+        excluded = exclusions.setdefault(uid, set())
+        for key, value in fields.get("EXDATE", []):
+            for date_value in value.split(","):
+                try:
+                    excluded.add(parse_date(date_value, key, zone)[0].timestamp())
+                except (ValueError, OverflowError):
+                    pass
+    for fields in records:
+        try:
+            if (_first(fields, "STATUS") or ("", ""))[1].upper() == "CANCELLED":
+                continue
+            start_key, start_val = _first(fields, "DTSTART")
+            start, all_day = parse_date(start_val, start_key, zone)
+            end_field = _first(fields, "DTEND")
+            end = parse_date(end_field[1], end_field[0], zone)[0] if end_field else start + (dt.timedelta(days=1) if all_day else dt.timedelta(hours=1))
+            if end <= start:
+                continue
+            duration = end - start
+            uid = (_first(fields, "UID") or ("", ""))[1]
+            title = decode_text((_first(fields, "SUMMARY") or ("", "UNTITLED"))[1]) or "UNTITLED"
+            rule = _first(fields, "RRULE")
+            starts = _occurrences(start, rule[1], zone, window_start - duration, window_end) if rule else [start]
+            for occurrence in starts:
+                if rule and (uid, occurrence.timestamp()) in detached:
+                    continue
+                if occurrence.timestamp() in exclusions.get(uid, set()):
+                    continue
+                finish = occurrence + duration
+                if finish >= window_start and occurrence <= window_end:
+                    events.append({"start": occurrence.timestamp(), "end": finish.timestamp(),
+                                   "title": title, "all_day": all_day})
+        except (KeyError, ValueError, OverflowError, TypeError):
+            continue
     return sorted(events, key=lambda e: (e["start"], e["title"]))
 
 

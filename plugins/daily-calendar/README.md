@@ -24,7 +24,7 @@ Use **Plugin Manager → Installed → Daily Calendar → Refresh calendar now**
 2. `configure()` receives the URL, timezone, refresh interval and event cycling interval. The feed URL is a secret capability link; never print it.
 3. `render()` constructs a 64×32 `Framebuffer`, draws `TODAY` and a divider using `frame.text()` and `frame.pixel()`, and reads a local JSON event cache. No image file is involved.
 4. When the cache is stale, `launch_refresh()` starts a separate fetch process, because ULS gives each frame a fresh subprocess with a short rendering timeout. The network request does **not** run inside `render()`.
-5. `parse_ics()` converts individual VEVENT start/end times into timestamps; `active_today()` filters expired events at render time. The title row scrolls when too long, and the lower row shows the start time or `ALL DAY`.
+5. `parse_ics()` converts VEVENT start/end times and common recurring instances into timestamps; `active_today()` filters expired events at render time. The title row scrolls when too long, and the lower row shows the start time or `ALL DAY`.
 6. If no events qualify, the plugin draws `NO EVENTS`. It still returns a complete framebuffer as required by the native screen API.
 
 `test_daily_calendar.py` contains examples for ICS parsing, end-time expiration, URL validation and text-frame dimensions. This plugin is a more advanced example than Hello World: it demonstrates local caching, network separation, time zones and external text data.
@@ -40,9 +40,9 @@ Use **Plugin Manager → Installed → Daily Calendar → Refresh calendar now**
 - Network failure retains the last successful cache. Clock and configured time zone determine event expiry.
 - ULS live-game precedence can suppress plugin screens.
 
-## Important v0.1.0 limitations
+## Recurrence support and limitations
 
-- **Recurring series with RRULE are not expanded**; those VEVENT entries are omitted. Single events and detached occurrences without RRULE work. A full recurrence parser is a planned follow-up.
+- The recurrence update expands common DAILY, WEEKLY, MONTHLY and YEARLY rules, with INTERVAL, COUNT, UNTIL, BYDAY, BYMONTHDAY, BYMONTH, EXDATE and detached RECURRENCE-ID overrides. Complex RFC 5545 combinations (such as ordinal BYDAY and BYSETPOS) are not yet supported.
 - The plugin supports HTTPS ICS feeds. It does not authenticate with Google or store Google account credentials.
 - A writable `/var/lib/uls/plugin-cache/daily-calendar` is required for the `uls` service account. If unavailable, set `ULS_CALENDAR_CACHE_DIR` to a writable private directory.
 - The URL is passed to the refresh child over stdin, not on the command line; private URLs must still be protected in ULS settings.
