@@ -7,7 +7,18 @@ from pathlib import Path
 import unittest
 from zoneinfo import ZoneInfo
 
-if "universal_led.display" not in sys.modules:\n    try:\n        from universal_led.display import Framebuffer\n    except ModuleNotFoundError:\n        display = types.ModuleType("universal_led.display")\n        display.Framebuffer = type("Framebuffer", (), {})\n        package = types.ModuleType("universal_led")\n        package.display = display\n        sys.modules.setdefault("universal_led", package)\n        sys.modules["universal_led.display"] = display\n\nspec = importlib.util.spec_from_file_location("daily_calendar", Path(__file__).with_name("daily_calendar.py"))
+if "universal_led.display" not in sys.modules:
+    try:
+        from universal_led.display import Framebuffer
+    except ModuleNotFoundError:
+        display = types.ModuleType("universal_led.display")
+        display.Framebuffer = type("Framebuffer", (), {})
+        package = types.ModuleType("universal_led")
+        package.display = display
+        sys.modules.setdefault("universal_led", package)
+        sys.modules["universal_led.display"] = display
+
+spec = importlib.util.spec_from_file_location("daily_calendar", Path(__file__).with_name("daily_calendar.py"))
 calendar = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(calendar)
 ZONE = ZoneInfo("America/New_York")
