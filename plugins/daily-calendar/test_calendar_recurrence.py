@@ -81,6 +81,9 @@ END:VEVENT"""
         self.assertTrue(events[0]["all_day"])
 
 
+    def test_time_colon_is_preserved(self):
+        self.assertEqual(calendar.ascii_label("6:30PM"), "6:30PM")
+
     def test_cancelled_detached_occurrence(self):
         source = """BEGIN:VEVENT
 UID:weekly
