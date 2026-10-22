@@ -1,6 +1,6 @@
 id = "daily-calendar"
 name = "Daily Calendar"
-version = "0.2.0"
+version = "0.2.1"
 api_version = 1
 capabilities = ["screen"]
 entry_point = "daily_calendar:DailyCalendarScreen"
