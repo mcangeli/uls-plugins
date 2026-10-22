@@ -100,7 +100,7 @@ def _occurrences(start, rule, zone, window_start, window_end):
     last = window_end.date()
     emitted = 0
     scanned = 0
-    while cursor <= last and scanned < 366 * 25:
+    while cursor <= last and scanned < 366 * 100:
         scanned += 1
         day_delta = (cursor - start.date()).days
         week_delta = (cursor - start.date()).days // 7
@@ -120,7 +120,7 @@ def _occurrences(start, rule, zone, window_start, window_end):
             match = False
         if byday and cursor.weekday() not in byday:
             match = False
-        candidate = dt.datetime.combine(cursor, start.timetz()).replace(tzinfo=start.tzinfo)
+        candidate = dt.datetime.combine(cursor, start.timetz())
         if until_time is not None and candidate > until_time:
             break
         if match and candidate >= start:
