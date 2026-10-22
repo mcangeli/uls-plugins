@@ -81,5 +81,35 @@ END:VEVENT"""
         self.assertTrue(events[0]["all_day"])
 
 
+    def test_cancelled_detached_occurrence(self):
+        source = """BEGIN:VEVENT
+UID:weekly
+DTSTART;TZID=America/New_York:20261001T090000
+DTEND;TZID=America/New_York:20261001T100000
+RRULE:FREQ=WEEKLY;BYDAY=TH
+SUMMARY:Original
+END:VEVENT
+BEGIN:VEVENT
+UID:weekly
+RECURRENCE-ID;TZID=America/New_York:20261022T090000
+DTSTART;TZID=America/New_York:20261022T090000
+DTEND;TZID=America/New_York:20261022T100000
+STATUS:CANCELLED
+SUMMARY:Cancelled
+END:VEVENT"""
+        events = calendar.active_today(calendar.parse_ics(source, now=NOW), NOW, "America/New_York")
+        self.assertEqual(events, [])
+
+    def test_long_running_weekly_series(self):
+        source = """BEGIN:VEVENT
+UID:old
+DTSTART;TZID=America/New_York:20100107T090000
+DTEND;TZID=America/New_York:20100107T100000
+RRULE:FREQ=WEEKLY;BYDAY=TH
+SUMMARY:Old Weekly
+END:VEVENT"""
+        events = calendar.active_today(calendar.parse_ics(source, now=NOW), NOW, "America/New_York")
+        self.assertEqual([e["title"] for e in events], ["Old Weekly"])
+
 if __name__ == "__main__":
     unittest.main()
