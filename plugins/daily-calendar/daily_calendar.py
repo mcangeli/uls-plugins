@@ -269,7 +269,7 @@ def launch_refresh(url, path, timezone, refresh_minutes):
 
 
 def ascii_label(value):
-    return "".join(c if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '" else " "
+    return "".join(c if c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 :'" else " "
                    for c in value.upper()).strip() or "EVENT"
 
 
