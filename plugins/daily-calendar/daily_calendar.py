@@ -19,7 +19,6 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
-from universal_led.display import Framebuffer
 
 GOLD = (245, 195, 85)
 WHITE = (235, 235, 230)
@@ -291,6 +290,7 @@ class DailyCalendarScreen:
         self.event_seconds = max(2, min(60, int(settings.get("event_seconds", 6))))
 
     def render(self):
+        from universal_led.display import Framebuffer
         frame = Framebuffer(64, 32)
         frame.text("TODAY", 1, 1, GOLD)
         for x in range(64):
